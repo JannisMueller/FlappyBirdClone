@@ -18,12 +18,13 @@ public class FlappyBird implements ActionListener {
 
     public Random rand = new Random();
 
-    public Rectangle bird = new Rectangle(WIDTH/ 2-10, HEIGHT /2-10,20,20);
+    public Rectangle bird = new Rectangle(WIDTH / 2 - 10, HEIGHT / 2 - 10,20,20);
+
+    public boolean gameOver, started = true;
 
     public ArrayList<Rectangle> columns = new ArrayList<>();
 
     public int ticks, yMotions;
-    //public static Renderer renderer;
 
     public FlappyBird(){
 
@@ -49,26 +50,50 @@ public class FlappyBird implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
+        int speed = 10;
         ticks++;
 
-        for(int i = 0; i < columns.size(); i++){
+        if(started) {
 
 
+            for (int i = 0; i < columns.size(); i++) {
 
+                Rectangle column = columns.get(i);
+                if (column.x + column.width < 0) {
+                    columns.remove(column);
+                    if (column.y == 0) {
+                        addColumn(false);
+
+
+                    }
+                }
+
+                column.x -= speed;
+
+            }
+
+            if (ticks % 2 == 0 && yMotions < 15) {
+
+                yMotions += 2;
+            }
+            bird.y += yMotions;
+            for (Rectangle column : columns) {
+                if (column.intersects(bird)) {
+                    gameOver = true;
+                }
+            }
+            if (bird.y > HEIGHT - 120 || bird.y < 0) {
+                gameOver = true;
+            }
         }
 
-        if(ticks % 2 == 0 && yMotions < 15)  {
+            renderer.repaint();
 
-            yMotions += 2;}
-
-        bird.y += yMotions;
-
-        renderer.repaint();
     }
 
     public void addColumn(boolean start){
-        int width = 500;
-        int space = 100;
+        int width = 100;
+        int space = 300;
         int height = 50 + rand.nextInt(300);
 
         if(start){
@@ -79,7 +104,7 @@ public class FlappyBird implements ActionListener {
         }
         else {
 
-            columns.add(new Rectangle(columns.get(columns.size()-1).x +600,HEIGHT-height-120,width,height));
+            columns.add(new Rectangle(columns.get(columns.size()-1).x + 600, HEIGHT-height-120,width,height));
             columns.add(new Rectangle(columns.get(columns.size()-1).x,0,width,HEIGHT-height-space));
 
         }
@@ -113,7 +138,12 @@ public class FlappyBird implements ActionListener {
         for(Rectangle column : columns){
             paintColumn(g,column);
         }
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial",1,100 ));
 
+        if(gameOver){
+            g.drawString("Game Over",100, HEIGHT / 2-50);
+        }
 
 
     }
